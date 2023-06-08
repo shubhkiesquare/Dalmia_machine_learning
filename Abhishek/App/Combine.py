@@ -1,9 +1,15 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
+import plotly.subplots as sp
+import plotly.express as px
 import numpy as np
 
 df = pd.read_excel('Week_District.xlsx')
+
+#--------------#
+#--------------#
+#--------------#
 
 ## Gauge Chart: Price Index and Share of Wallet
 g1 = df.groupby(['Year-Week'], as_index=False).apply(lambda group: pd.Series({
@@ -96,7 +102,73 @@ st.markdown(f"<p style='color:{wallet_indicator_color};'>{change_indicator_text_
 #--------------------------#
 #--------------------------#
 
-# Delta_PI/PI vs Delta_Vol/Vol
+## Price Index vs Bill Quantity
+
+# Set page title
+st.title("Price Index vs Bill Quantity")
+# Create a subplot grid
+fig = sp.make_subplots(rows=1, cols=1, specs=[[{"secondary_y": True}]])
+
+# Add the Price_Index trace to the subplot
+fig.add_trace(go.Scatter(x=g3['Year-Week'], y=g3['N_Price_Index_Weekly'], name='Price_Index', line=dict(color='blue')), secondary_y=False)
+
+# Add the Bill_Quantity trace to the subplot
+fig.add_trace(go.Scatter(x=g3['Year-Week'], y=g3['N_Weekly_Dist_Bill Qty_x'], name='Bill_Quantity', line=dict(color='red')), secondary_y=True)
+
+# Set x-axis label
+fig.update_xaxes(title_text='Year-Week')
+
+# Set y-axes labels
+fig.update_yaxes(title_text='Price_Index', color='blue', secondary_y=False)
+fig.update_yaxes(title_text='Bill_Quantity', color='red', secondary_y=True)
+
+# Set the figure title
+fig.update_layout(title_text='Price Index vs Bill Quantity')
+
+# Display the plot
+st.plotly_chart(fig)
+
+#--------------------------#
+#--------------------------#
+#--------------------------#
+
+## Price Index and Change in Price Index: Zone Level
+
+z1 = df.groupby(['SH Location','Year-Week'], as_index=False).apply(lambda group: pd.Series({
+    'Z_Weekly_dist_DAL WSP': ((group['agg_Weekly_Dist_DAL WSP'] * group['Weekly_Dist_Bill_Qty']).sum()) / group['Weekly_Dist_Bill_Qty'].sum(),
+    'Z_Weekly_Dist_Bill Qty': group['Weekly_Dist_Bill_Qty'].sum()
+}))
+z2 = df.groupby(['SH Location','Year-Week'], as_index=False).apply(lambda group: pd.Series({
+    'Z_Weekly_dist_UT WSP': ((group['agg_Weekly_Dist_UT WSP'] * group['Weekly_Dist_Bill_Qty']).sum()) / group['Weekly_Dist_Bill_Qty'].sum(),
+    'Z_Weekly_Dist_Bill Qty': group['Weekly_Dist_Bill_Qty'].sum()
+}))
+z3=pd.merge(z1,z2, how='inner',left_on=['SH Location','Year-Week'],right_on=['SH Location','Year-Week'])
+z3['Price_Index']= z3['Z_Weekly_dist_DAL WSP']/z3['Z_Weekly_dist_UT WSP']
+z3['Change_in_Price_Index'] = z3.groupby(['SH Location'], as_index=False)['Price_Index'].diff()
+z3['Price_Index'] = z3['Price_Index'].round(3)
+z3['Change_in_Price_Index'] = (z3['Change_in_Price_Index']/z3['Price_Index'])*100
+z3['Change_in_Price_Index'] =z3['Change_in_Price_Index'].round(2)
+# Set page title
+st.title("Price Index and Change in Price Index: Zone Level")
+
+# Filter the dataset based on the selected week
+week_data = z3[z3['Year-Week'] == selected_year_week]
+
+# Apply conditional formatting with colors to the rows
+def highlight_row(row):
+    color = 'green' if row['Change_in_Price_Index'] > 1 or  row['Change_in_Price_Index'] < -1 else 'black' 
+    return ['background-color: {}'.format(color)] * len(row)
+
+styled_week_data =week_data[['SH Location', 'Price_Index', 'Change_in_Price_Index']].style.apply(highlight_row, axis=1)
+
+# Display the styled data table
+st.dataframe(styled_week_data)
+
+#--------------------------#
+#--------------------------#
+#--------------------------#
+
+## Delta_PI/PI vs Delta_Vol/Vol
 p1= df.copy()
 
 p1['change_PI'] = p1.groupby(['SH Location','DISTRICT CODE'],as_index=False)['Price_Index_Weekly_Dist'].diff()
