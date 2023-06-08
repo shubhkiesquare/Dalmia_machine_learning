@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 
 # Assuming you have a dataframe called 'df' with columns Year-Week, Price_Index, and Change_in_Price_Index
 # Replace 'df' with your actual dataframe name
-df = pd.read_excel('Weekly_Pie.xlsx')
+df = pd.read_excel('D:\KiE Square\Dalmia_machine_learning\Abhishek\App\Datafiles\Weekly_Pie.xlsx')
 # Create a Dash app
 app = dash.Dash(__name__)
 
