@@ -1,2 +1,2 @@
 # Dalmia_machine_learning
-Code space for dalmai
+Code space for dalmia
