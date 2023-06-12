@@ -4,7 +4,9 @@ import plotly.graph_objects as go
 import plotly.subplots as sp
 import plotly.express as px
 import numpy as np
+st.set_page_config(layout="wide")
 def dashboard(df):
+    
     ## Gauge Chart: Price Index and Share of Wallet
     g1 = df.groupby(['Year-Week'], as_index=False).apply(lambda group: pd.Series({
         'N_Weekly_dist_DAL WSP': ((group['agg_Weekly_Dist_DAL WSP'] * group['Weekly_Dist_Bill_Qty']).sum()) / group['Weekly_Dist_Bill_Qty'].sum(),
@@ -26,7 +28,7 @@ def dashboard(df):
     g3['Share_of_wallet'] = random_percentages
     g3['Share_of_wallet_Change'] =  (g3['Share_of_wallet'].diff()/g3['Share_of_wallet'])*100
     # Set page title
-    st.title("Price Index Gauge Chart")
+    # st.title("Price Index Analysis")
 
     # Create a dropdown to select the Year-Week
     selected_year_week = st.selectbox("Select Year-Week:", g3['Year-Week'].unique())
@@ -43,95 +45,126 @@ def dashboard(df):
     total_sales = round(total_sales,2)
     # Display the total sales value in Streamlit
     st.write("Total Volume:", total_sales, "MT")
-    
     ## Correlation between Price Index and Volumn
     correlation = g3['N_Price_Index_Weekly'].corr(g3['N_Weekly_Dist_Bill Qty_x'])
     correlation = round(correlation,2)
     st.write("Correlation:", correlation)
-    # Create a gauge chart for price index
-    fig1 = go.Figure(go.Indicator(
-        mode="gauge+number",
-        value=price_index,
-        domain={'x': [0, 1], 'y': [0, 1]},
-        gauge={'axis': {'range': [0.95, 1.05]}},
-        title={'text': "<b>Price Index</b>", 'font': {'family': 'bold'}}
-    ))
-
-    # Create a gauge chart for share of wallet
-    fig2 = go.Figure(go.Indicator(
-        mode="gauge+number",
-        value=share_wallet,
-        domain={'x': [0, 1], 'y': [0, 1]},
-        gauge={'axis': {'range': [0, 100]}},
-        title={'text': "<b>Share of Wallet</b>", 'font': {'family': 'bold'}},
-        number={'suffix': '%'}
-    ))
+    # st.set_page_config(layout="wide")
+    col1, col2 = st.columns(2)
+    with col1:
+        # Create a gauge chart for price index
+        fig1 = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=price_index,
+            domain={'x': [0, 1], 'y': [0, 1]},
+            gauge={'axis': {'range': [0.95, 1.05]}},
+            title={'text': "<b>Price Index</b>", 'font': {'family': 'bold'}}
+        ))
+            # Set up the change indicator symbol and color for price index
+        if change_in_price_index > 0:
+            price_indicator_symbol = u"\u25B2"  # upper triangular symbol
+            price_indicator_color = 'green'
+        elif change_in_price_index < 0:
+            price_indicator_symbol = u"\u25BC"  # lower triangular symbol
+            price_indicator_color = 'red'
+        else:
+            price_indicator_symbol = ''  # no indicator
+            price_indicator_color = 'black'
+        change_indicator_text_price = f"{price_indicator_symbol} {change_in_price_index}%"
+        indicator_style = {'font-size': '20px', 'margin': '10px'}
+        st.plotly_chart(fig1, use_container_width=True)
+        st.markdown(f"<p style='text-align: center; color:{price_indicator_color};'>{change_indicator_text_price}</p>", unsafe_allow_html=True)
+    with col2:
+        # Create a gauge chart for share of wallet
+        fig2 = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=share_wallet,
+            domain={'x': [0, 1], 'y': [0, 1]},
+            gauge={'axis': {'range': [0, 100]}},
+            title={'text': "<b>Share of Wallet</b>", 'font': {'family': 'bold'}},
+            number={'suffix': '%'}
+        ))
+            # Set up the change indicator symbol and color for share of wallet
+        if change_in_share_wallet > 0:
+            wallet_indicator_symbol = u"\u25B2"  # upper triangular symbol
+            wallet_indicator_color = 'green'
+        elif change_in_share_wallet < 0:
+            wallet_indicator_symbol = u"\u25BC"  # lower triangular symbol
+            wallet_indicator_color = 'red'
+        else:
+            wallet_indicator_symbol = ''  # no indicator
+            wallet_indicator_color = 'black'
+        change_indicator_text_wallet = f"{wallet_indicator_symbol} {change_in_share_wallet}%"
+        indicator_style = {'font-size': '20px', 'margin': '10px'}
+        st.plotly_chart(fig2, use_container_width=True)
+        st.markdown(f"<p style='text-align: center; color:{wallet_indicator_color};'>{change_indicator_text_wallet}</p>", unsafe_allow_html=True)
 
     # Set up the change indicator text and style
     change_indicator = f"Price Index: {change_in_price_index}% | Share of Wallet: {change_in_share_wallet}%"
 
-    # Set up the change indicator symbol and color for price index
-    if change_in_price_index > 0:
-        price_indicator_symbol = u"\u25B2"  # upper triangular symbol
-        price_indicator_color = 'green'
-    elif change_in_price_index < 0:
-        price_indicator_symbol = u"\u25BC"  # lower triangular symbol
-        price_indicator_color = 'red'
-    else:
-        price_indicator_symbol = ''  # no indicator
-        price_indicator_color = 'black'
+    # # Set up the change indicator symbol and color for price index
+    # if change_in_price_index > 0:
+    #     price_indicator_symbol = u"\u25B2"  # upper triangular symbol
+    #     price_indicator_color = 'green'
+    # elif change_in_price_index < 0:
+    #     price_indicator_symbol = u"\u25BC"  # lower triangular symbol
+    #     price_indicator_color = 'red'
+    # else:
+    #     price_indicator_symbol = ''  # no indicator
+    #     price_indicator_color = 'black'
 
-    # Set up the change indicator symbol and color for share of wallet
-    if change_in_share_wallet > 0:
-        wallet_indicator_symbol = u"\u25B2"  # upper triangular symbol
-        wallet_indicator_color = 'green'
-    elif change_in_share_wallet < 0:
-        wallet_indicator_symbol = u"\u25BC"  # lower triangular symbol
-        wallet_indicator_color = 'red'
-    else:
-        wallet_indicator_symbol = ''  # no indicator
-        wallet_indicator_color = 'black'
+    # # Set up the change indicator symbol and color for share of wallet
+    # if change_in_share_wallet > 0:
+    #     wallet_indicator_symbol = u"\u25B2"  # upper triangular symbol
+    #     wallet_indicator_color = 'green'
+    # elif change_in_share_wallet < 0:
+    #     wallet_indicator_symbol = u"\u25BC"  # lower triangular symbol
+    #     wallet_indicator_color = 'red'
+    # else:
+    #     wallet_indicator_symbol = ''  # no indicator
+    #     wallet_indicator_color = 'black'
 
-    change_indicator_text_price = f"{price_indicator_symbol} {change_in_price_index}%"
-    change_indicator_text_wallet = f"{wallet_indicator_symbol} {change_in_share_wallet}%"
-    indicator_style = {'font-size': '20px', 'margin': '10px'}
+    # change_indicator_text_price = f"{price_indicator_symbol} {change_in_price_index}%"
+    # change_indicator_text_wallet = f"{wallet_indicator_symbol} {change_in_share_wallet}%"
+    # indicator_style = {'font-size': '20px', 'margin': '10px'}
 
     # Display the gauge chart and change indicator with symbols and colors
-    st.plotly_chart(fig1)
-    st.markdown(f"<p style='color:{price_indicator_color};'>{change_indicator_text_price}</p>", unsafe_allow_html=True)
-    st.title("Share of Wallet Gauge Chart")
-    st.plotly_chart(fig2)
-    st.markdown(f"<p style='color:{wallet_indicator_color};'>{change_indicator_text_wallet}</p>", unsafe_allow_html=True)
+    # st.plotly_chart(fig1)
+    # st.markdown(f"<p style='color:{price_indicator_color};'>{change_indicator_text_price}</p>", unsafe_allow_html=True)
+    # st.title("Share of Wallet Gauge Chart")
+    # st.plotly_chart(fig2)
+    # st.markdown(f"<p style='color:{wallet_indicator_color};'>{change_indicator_text_wallet}</p>", unsafe_allow_html=True)
 
     #--------------------------#
     #--------------------------#
     #--------------------------#
 
     ## Price Index vs Volume
-
-    # Set page title
-    st.title("Price Index vs Volume")
+    st.write(" ")
+    st.write(" ")
     # Create a subplot grid
-    fig = sp.make_subplots(rows=1, cols=1, specs=[[{"secondary_y": True}]])
+    col11, col22 = st.columns(2)
+    with col11:
+        fig = sp.make_subplots(specs=[[{"secondary_y": True}]])
 
-    # Add the Price_Index trace to the subplot
-    fig.add_trace(go.Scatter(x=g3['Year-Week'], y=g3['N_Price_Index_Weekly'], name='Price_Index', line=dict(color='blue')), secondary_y=False)
+        # Add the Price_Index trace to the subplot
+        fig.add_trace(go.Scatter(x=g3['Year-Week'], y=g3['N_Price_Index_Weekly'], name='Price_Index', line=dict(color='blue')), secondary_y=False)
 
-    # Add the Bill_Quantity trace to the subplot
-    fig.add_trace(go.Scatter(x=g3['Year-Week'], y=g3['N_Weekly_Dist_Bill Qty_x'], name='Volume', line=dict(color='red')), secondary_y=True)
+        # Add the Bill_Quantity trace to the subplot
+        fig.add_trace(go.Scatter(x=g3['Year-Week'], y=g3['N_Weekly_Dist_Bill Qty_x'], name='Volume', line=dict(color='red')), secondary_y=True)
 
-    # Set x-axis label
-    fig.update_xaxes(title_text='Year-Week')
+        # Set x-axis label
+        fig.update_xaxes(title_text='Year-Week')
 
-    # Set y-axes labels
-    fig.update_yaxes(title_text='Price_Index', color='blue', secondary_y=False)
-    fig.update_yaxes(title_text='Volume', color='red', secondary_y=True)
+        # Set y-axes labels
+        fig.update_yaxes(title_text='Price_Index', color='blue', secondary_y=False)
+        fig.update_yaxes(title_text='Volume', color='red', secondary_y=True)
 
-    # Set the figure title
-    fig.update_layout(title_text='Price Index vs Volume')
+        # Set the figure title
+        st.markdown("<h5 style='text-align: center; color: white;'>Price Index vs Volume </h2>", unsafe_allow_html=True)
 
-    # Display the plot
-    st.plotly_chart(fig)
+        # Display the plot
+        st.plotly_chart(fig, use_container_width=True)
 
     #--------------------------#
     #--------------------------#
@@ -139,35 +172,40 @@ def dashboard(df):
 
     ## Price Index and Change in Price Index: Zone Level
 
-    z1 = df.groupby(['SH Location','Year-Week'], as_index=False).apply(lambda group: pd.Series({
-        'Z_Weekly_dist_DAL WSP': ((group['agg_Weekly_Dist_DAL WSP'] * group['Weekly_Dist_Bill_Qty']).sum()) / group['Weekly_Dist_Bill_Qty'].sum(),
-        'Z_Weekly_Dist_Bill Qty': group['Weekly_Dist_Bill_Qty'].sum()
-    }))
-    z2 = df.groupby(['SH Location','Year-Week'], as_index=False).apply(lambda group: pd.Series({
-        'Z_Weekly_dist_UT WSP': ((group['agg_Weekly_Dist_UT WSP'] * group['Weekly_Dist_Bill_Qty']).sum()) / group['Weekly_Dist_Bill_Qty'].sum(),
-        'Z_Weekly_Dist_Bill Qty': group['Weekly_Dist_Bill_Qty'].sum()
-    }))
-    z3=pd.merge(z1,z2, how='inner',left_on=['SH Location','Year-Week'],right_on=['SH Location','Year-Week'])
-    z3['Price_Index']= z3['Z_Weekly_dist_DAL WSP']/z3['Z_Weekly_dist_UT WSP']
-    z3['Change_in_Price_Index'] = z3.groupby(['SH Location'], as_index=False)['Price_Index'].diff()
-    z3['Price_Index'] = z3['Price_Index'].round(3)
-    z3['Change_in_Price_Index'] = (z3['Change_in_Price_Index']/z3['Price_Index'])*100
-    z3['Change_in_Price_Index'] =z3['Change_in_Price_Index'].round(2)
-    # Set page title
-    st.title("Price Index and Change in Price Index: Zone Level")
+    with col22:
+        z1 = df.groupby(['SH Location','Year-Week'], as_index=False).apply(lambda group: pd.Series({
+            'Z_Weekly_dist_DAL WSP': ((group['agg_Weekly_Dist_DAL WSP'] * group['Weekly_Dist_Bill_Qty']).sum()) / group['Weekly_Dist_Bill_Qty'].sum(),
+            'Z_Weekly_Dist_Bill Qty': group['Weekly_Dist_Bill_Qty'].sum()
+        }))
+        z2 = df.groupby(['SH Location','Year-Week'], as_index=False).apply(lambda group: pd.Series({
+            'Z_Weekly_dist_UT WSP': ((group['agg_Weekly_Dist_UT WSP'] * group['Weekly_Dist_Bill_Qty']).sum()) / group['Weekly_Dist_Bill_Qty'].sum(),
+            'Z_Weekly_Dist_Bill Qty': group['Weekly_Dist_Bill_Qty'].sum()
+        }))
+        z3=pd.merge(z1,z2, how='inner',left_on=['SH Location','Year-Week'],right_on=['SH Location','Year-Week'])
+        z3['Price_Index']= z3['Z_Weekly_dist_DAL WSP']/z3['Z_Weekly_dist_UT WSP']
+        z3['Change_in_Price_Index'] = z3.groupby(['SH Location'], as_index=False)['Price_Index'].diff()
+        z3['Price_Index'] = z3['Price_Index'].round(3)
+        z3['Change_in_Price_Index'] = (z3['Change_in_Price_Index']/z3['Price_Index'])*100
+        z3['Change_in_Price_Index'] =z3['Change_in_Price_Index'].round(2)
 
-    # Filter the dataset based on the selected week
-    week_data = z3[z3['Year-Week'] == selected_year_week]
+        # Filter the dataset based on the selected week
+        week_data = z3[z3['Year-Week'] == selected_year_week]
 
-    # Apply conditional formatting with colors to the rows
-    def highlight_row(row):
-        color = 'green' if row['Change_in_Price_Index'] > 1 or  row['Change_in_Price_Index'] < -1 else 'black' 
-        return ['background-color: {}'.format(color)] * len(row)
+        # Apply conditional formatting with colors to the rows
+        def highlight_row(row):
+            color = 'green' if row['Change_in_Price_Index'] > 1 or  row['Change_in_Price_Index'] < -1 else 'black' 
+            return ['background-color: {}'.format(color)] * len(row)
 
-    styled_week_data =week_data[['SH Location', 'Price_Index', 'Change_in_Price_Index']].style.apply(highlight_row, axis=1)
-
-    # Display the styled data table
-    st.dataframe(styled_week_data)
+        styled_week_data =week_data[['SH Location', 'Price_Index', 'Change_in_Price_Index']].style.apply(highlight_row, axis=1)
+        st.markdown("<h5 style='text-align: center; color: white;'>Price Index and Change in Price Index: Zone Level </h2>", unsafe_allow_html=True)
+        st.write(" ")
+        st.write(" ")
+        st.write(" ")
+        st.write(" ")
+        st.write(" ")
+        st.write(" ")
+        # Display the styled data table
+        st.dataframe(styled_week_data, use_container_width=True)
 
     #--------------------------#
     #--------------------------#

@@ -16,7 +16,8 @@ def manipulation(data):
             if len(parts) == 2 and parts[0].isdigit() and parts[1].isdigit():
                 start, end = int(parts[0]), int(parts[1])
                 return int((start + end) / 2)
-        # If the value is either an integer or a string without '-', convert it directly into an integer
+        # If the value is either an integer or a string without '-',
+        # convert it directly into an integer
         try:
             return int(value)
         except ValueError:

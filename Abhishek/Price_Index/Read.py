@@ -8,4 +8,3 @@ import numpy as np
 def read():
     data = pd.read_excel('Price_PD_WSP_Apr_22-Feb_23_with_QTY_ASO.xlsx')
     return data
-    
