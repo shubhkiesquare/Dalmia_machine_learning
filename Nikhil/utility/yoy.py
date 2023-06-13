@@ -51,9 +51,7 @@ def return_yoy_df(directory):
     print(8)
     pivot_table.to_csv('pivot_table_march.csv')
 
-if __name__ == '__main__':
-    directory = 'data/yoy_calculation'
-    print(return_yoy_df(directory))
+
     
     
     
