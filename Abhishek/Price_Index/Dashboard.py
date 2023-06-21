@@ -4,10 +4,13 @@ import plotly.graph_objects as go
 import plotly.subplots as sp
 import plotly.express as px
 import numpy as np
-import Combine, Read, manipulation
+import Combine
+import Combine, Read, manipulation, datamanipulation, read_new
 from Combine import *
-from Read import *
-from manipulation import *
+# from Read import *
+# from manipulation import *
+from datamanipulation import *
+from read_new import *
 from PIL import Image
 #st.image(image, caption=None, width=None, use_column_width=None, clamp=False, channels="RGB", output_format="auto")
 # st.set_page_config(layout="wide")
@@ -32,7 +35,7 @@ with col_fig2:
         st.write(" ")
 with col_title:
     st.markdown("<h1 style='text-align: center; color: white;'>Price Index Analysis</h1>", unsafe_allow_html=True)
-data = read()
-df = manipulation(data)
 
+df1,df2,df3 = read_all()
+df = datamanipulation(df1,df2,df3)
 dashboard(df)

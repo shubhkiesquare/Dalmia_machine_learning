@@ -4,10 +4,10 @@ import plotly.graph_objects as go
 import plotly.subplots as sp
 import plotly.express as px
 import numpy as np
+import matplotlib.pyplot as plt
 st.set_page_config(layout="wide")
 def dashboard(df):
-    
-    ## Gauge Chart: Price Index and Share of Wallet
+    # Gauge Chart: Price Index and Share of Wallet
     g1 = df.groupby(['Year-Week'], as_index=False).apply(lambda group: pd.Series({
         'N_Weekly_dist_DAL WSP': ((group['agg_Weekly_Dist_DAL WSP'] * group['Weekly_Dist_Bill_Qty']).sum()) / group['Weekly_Dist_Bill_Qty'].sum(),
         'N_Weekly_Dist_Bill Qty': group['Weekly_Dist_Bill_Qty'].sum()
@@ -16,13 +16,13 @@ def dashboard(df):
         'N_Weekly_dist_UT WSP': ((group['agg_Weekly_Dist_UT WSP'] * group['Weekly_Dist_Bill_Qty']).sum()) / group['Weekly_Dist_Bill_Qty'].sum(),
         'N_Weekly_Dist_Bill Qty': group['Weekly_Dist_Bill_Qty'].sum()
     }))
-
     g3=pd.merge(g1,g2, how='inner',left_on=['Year-Week'],right_on=['Year-Week'])
+
     g3['N_Price_Index_Weekly']= g3['N_Weekly_dist_DAL WSP']/g3['N_Weekly_dist_UT WSP']
     g3['N_Price_Index_Weekly_Change'] =  g3['N_Price_Index_Weekly'].diff()
     g3['N_Price_Index_Weekly_Change'] = (g3['N_Price_Index_Weekly_Change']/g3['N_Price_Index_Weekly'])*100
     # Generate random percentages between 0 and 100
-    random_percentages = np.random.uniform(40, 41, size=44)
+    random_percentages = np.random.uniform(40, 41, size=53)
 
     # Assign the random percentages to a new column in the dataframe
     g3['Share_of_wallet'] = random_percentages
@@ -145,26 +145,38 @@ def dashboard(df):
     # Create a subplot grid
     col11, col22 = st.columns(2)
     with col11:
-        fig = sp.make_subplots(specs=[[{"secondary_y": True}]])
+        # fig = sp.make_subplots(specs=[[{"secondary_y": True}]])
 
-        # Add the Price_Index trace to the subplot
-        fig.add_trace(go.Scatter(x=g3['Year-Week'], y=g3['N_Price_Index_Weekly'], name='Price_Index', line=dict(color='blue')), secondary_y=False)
+        # # Add the Price_Index trace to the subplot
+        # fig.add_trace(go.Scatter(x=g3['Year-Week'], y=g3['N_Price_Index_Weekly'], name='Price_Index', line=dict(color='blue')), secondary_y=False)
 
-        # Add the Bill_Quantity trace to the subplot
-        fig.add_trace(go.Scatter(x=g3['Year-Week'], y=g3['N_Weekly_Dist_Bill Qty_x'], name='Volume', line=dict(color='red')), secondary_y=True)
+        # # Add the Bill_Quantity trace to the subplot
+        # fig.add_trace(go.Scatter(x=g3['Year-Week'], y=g3['N_Weekly_Dist_Bill Qty_x'], name='Volume', line=dict(color='red')), secondary_y=True)
 
-        # Set x-axis label
-        fig.update_xaxes(title_text='Year-Week')
+        # # Set x-axis label and tick format
+        # fig.update_xaxes(title_text='Year-Week', tickformat='%Y-%W')
 
-        # Set y-axes labels
-        fig.update_yaxes(title_text='Price_Index', color='blue', secondary_y=False)
-        fig.update_yaxes(title_text='Volume', color='red', secondary_y=True)
+        # # Set y-axes labels
+        # fig.update_yaxes(title_text='Price_Index', color='blue', secondary_y=False)
+        # fig.update_yaxes(title_text='Volume', color='red', secondary_y=True)
+        fig, ax1 = plt.subplots(figsize=(18, 10))
+        plt.xticks(rotation=45)
+        # Plot the Price_Index on the left y-axis
+        ax1.plot(g3['Year-Week'], g3['N_Price_Index_Weekly'], color='blue')
+        ax1.set_ylabel('Price Index', color='blue', fontsize=16)
 
-        # Set the figure title
+        # Create a second y-axis
+        ax2 = ax1.twinx()
+
+        # Plot the Bill_Quantity on the right y-axis
+        ax2.plot(g3['Year-Week'], g3['N_Weekly_Dist_Bill Qty_x'], color='red')
+        ax2.set_ylabel('Volume', color='red', fontsize=16)
+
+        # Set labels and title
+        ax1.set_xlabel('Year-Week', fontsize=14)
         st.markdown("<h5 style='text-align: center; color: white;'>Price Index vs Volume </h2>", unsafe_allow_html=True)
-
         # Display the plot
-        st.plotly_chart(fig, use_container_width=True)
+        st.pyplot(fig)
 
     #--------------------------#
     #--------------------------#
@@ -198,11 +210,11 @@ def dashboard(df):
 
         styled_week_data =week_data[['SH Location', 'Price_Index', 'Change_in_Price_Index']].style.apply(highlight_row, axis=1)
         st.markdown("<h5 style='text-align: center; color: white;'>Price Index and Change in Price Index: Zone Level </h2>", unsafe_allow_html=True)
-        st.write(" ")
-        st.write(" ")
-        st.write(" ")
-        st.write(" ")
-        st.write(" ")
+        # st.write(" ")
+        # st.write(" ")
+        # st.write(" ")
+        # st.write(" ")
+        # st.write(" ")
         st.write(" ")
         # Display the styled data table
         st.dataframe(styled_week_data, use_container_width=True)
