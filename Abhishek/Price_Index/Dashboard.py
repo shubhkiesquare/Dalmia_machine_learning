@@ -4,8 +4,7 @@ import plotly.graph_objects as go
 import plotly.subplots as sp
 import plotly.express as px
 import numpy as np
-import Combine
-import Combine, Read, manipulation, datamanipulation, read_new
+import Combine, datamanipulation, read_new
 from Combine import *
 # from Read import *
 # from manipulation import *
@@ -36,6 +35,6 @@ with col_fig2:
 with col_title:
     st.markdown("<h1 style='text-align: center; color: white;'>Price Index Analysis</h1>", unsafe_allow_html=True)
 
-df1,df2,df3 = read_all()
-df = datamanipulation(df1,df2,df3)
+df1,df2,df3,df4 = read_all()
+df = datamanipulation(df1,df2,df3,df4)
 dashboard(df)

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # beautifulsoup4==4.9.1
 # bs4==0.0.1
 # certifi==2020.6.20
@@ -47,3 +48,10 @@ pandas==1.5.2
 Pillow==9.5.0
 plotly==5.14.1
 streamlit==1.20.0
+=======
+numpy==1.23.5
+pandas==1.5.2
+Pillow==9.5.0
+plotly==5.14.1
+streamlit==1.20.0
+>>>>>>> f38ccff2cd75ba3d5e7e7f3e0d328cee1c9c9c6f
