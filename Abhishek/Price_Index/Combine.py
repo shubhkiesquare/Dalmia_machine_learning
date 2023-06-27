@@ -231,7 +231,8 @@ def dashboard(df):
     #--------------------------#
 
     ## Delta_PI/PI vs Delta_Vol/Vol
-    st.title("Delta_PI/PI vs Delta_Vol/Vol")
+    st.write(" ")
+    st.markdown("<h5 style='text-align: center; color: white;'>Delta_PI/PI vs Delta_Vol/Vol</h2>", unsafe_allow_html=True)
     p1= df.copy()
 
     p1['change_PI'] = p1.groupby(['SH Location','DISTRICT'],as_index=False)['Price_Index_Weekly_Dist'].diff()
